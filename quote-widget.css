@@ -1,0 +1,14 @@
+
+.ui-datepicker {
+    width: 25em !important;
+}
+.quote-of-the-day {
+    display: flex;
+    flex-direction: row;
+    column-gap: 2em;
+
+}
+
+.quote-of-the-day h2 {
+    margin-bottom: 1em;
+}
