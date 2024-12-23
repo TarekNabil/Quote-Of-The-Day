@@ -1,7 +1,6 @@
 jQuery(document).ready(function($) {
     $('#quote_date_picker').datepicker({
-        dateFormat: 'yy-mm-dd',
-        maxDate: 0
+        dateFormat: 'yy-mm-dd'
     });
     // at date change, update quote-content WITH  the new quote
     $('#quote_date_picker').change(function() {
