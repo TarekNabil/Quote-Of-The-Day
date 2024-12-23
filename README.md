@@ -1,19 +1,19 @@
 # Quote of the Day
 
 **Plugin Name:** Quote of the Day  
-**Description:** A plugin to display the quote of the day with a calendar to pick previous dates.  
+**Description:** A plugin to display the quote of the day with a calendar to pick all dates.  
 **Version:** 1.0  
 **Author:** Tarek Nabil
 
 ## Description
 
-The "Quote of the Day" plugin allows you to display a quote of the day from a custom post type. Users can select a date from a calendar to view quotes from previous dates. The plugin integrates with Elementor to provide a custom widget for displaying the quotes.
+The "Quote of the Day" plugin allows you to display a quote of the day from a custom post type. Users can select a date from a calendar to view quotes from all dates. The plugin integrates with Elementor to provide a custom widget for displaying the quotes.
 
 ## Features
 
 - Custom post type for quotes
 - Shortcode to display the quote of the day
-- jQuery UI datepicker to select previous dates
+- jQuery UI datepicker to select all dates
 - Elementor widget for easy integration
 
 ## Installation
@@ -31,7 +31,7 @@ Use the `[quote_of_the_day]` shortcode to display the quote of the day. The shor
 
 ### Elementor Widget
 
-The plugin provides an Elementor widget named "Quote of the Day". You can add this widget to any page using the Elementor editor. The widget will display the quote of the day with a datepicker to select previous dates.
+The plugin provides an Elementor widget named "Quote of the Day". You can add this widget to any page using the Elementor editor. The widget will display the quote of the day with a datepicker to select all dates.
 
 ## Custom Post Type
 

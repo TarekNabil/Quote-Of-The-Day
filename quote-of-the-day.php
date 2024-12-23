@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Quote of the Day
-Description: A plugin to display the quote of the day with a calendar to pick previous dates.
+Description: A plugin to display the quote of the day with a calendar to pick all dates.
 Version: 1.0
 Author: Tarek Nabil
 */
