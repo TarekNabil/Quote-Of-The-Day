@@ -1,13 +1,13 @@
 # Quote of the Day
 
 **Plugin Name:** Quote of the Day  
-**Description:** A plugin to display the quote of the day with a calendar to pick all dates.  
+**Description:** WordPress plugin to display the quote of the day with a calendar to pick previous dates.  
 **Version:** 1.0  
 **Author:** Tarek Nabil
 
 ## Description
 
-The "Quote of the Day" plugin allows you to display a quote of the day from a custom post type. Users can select a date from a calendar to view quotes from all dates. The plugin integrates with Elementor to provide a custom widget for displaying the quotes.
+The "Quote of the Day" wordpress plugin allows you to display a quote of the day from a custom post type. Users can select a date from a calendar to view quotes from previous dates. The plugin integrates with Elementor to provide a custom widget for displaying the quotes.
 
 ## Features
 
