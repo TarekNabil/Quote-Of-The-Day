@@ -1,10 +1,70 @@
+
+/* Edit calendar heighlight color */
+
+#quote_date_picker .ui-state-active,
+#quote_date_picker .ui-widget-content .ui-state-active,
+#quote_date_picker .ui-widget-header .ui-state-active,
+#quote_date_picker a.ui-button:active,
+#quote_date_picker .ui-button:active,
+#quote_date_picker .ui-button.ui-state-active:hover {
+    color: #f7a14d;
+}
+#quote_date_picker .ui-icon-background,
+#quote_date_picker .ui-state-active .ui-icon-background {
+    background-color: #f7a14d;
+}
+
+#quote_date_picker .ui-state-active a,
+#quote_date_picker .ui-state-active a:link,
+#quote_date_picker .ui-state-active a:visited {
+    
+    color: #f7a14d;
+}
+#quote_date_picker .ui-state-error,
+#quote_date_picker .ui-widget-content .ui-state-error,
+#quote_date_picker .ui-widget-header .ui-state-error {
+	border: 1px solid #f7a14d;
+}
+#quote_date_picker .ui-state-error .ui-icon,
+#quote_date_picker .ui-state-error-text .ui-icon {
+	background-image: url("images/ui-icons_f7a14d_256x240.png");
+}
 .quote-of-the-day {
     display: flex;
     flex-direction: row;
     column-gap: 2em;
-
 }
-
+.quote_date_picker{
+    width : 20em;
+}
 .quote-of-the-day h2 {
     margin-bottom: 1em;
+}
+
+/* set responsive design for the widget. */
+@media screen and (max-width: 768px) {
+    .quote-content {
+        width: 100%;
+    }
+    .quote_date_picker{
+        width : 100% !important;
+    }
+    .quote-of-the-day {
+        flex-direction: column;
+
+        row-gap: 2em;
+        justify-content: center;
+    }
+    #quote_date_picker .ui-datepicker {
+        width: 100%;
+    }
+
+       
+
+}
+#quote_date_picker td,#quote_date_picker th {
+    border-top: none !important;
+    padding: 0 !important;
+    border-color: transparent !important;
+    border: 0 !important;
 }
