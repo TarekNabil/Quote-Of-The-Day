@@ -1,7 +1,8 @@
 jQuery(document).ready(function($) {
     $.datepicker.regional['hy'] = {
-        dayNamesShort: ['Բշ.', 'Գշ.','Դշ.','Եշ.','Ուրբ.','Շբ.','Կիր.'],
-        dayNamesMin: ['Բշ.', 'Գշ.','Դշ.','Եշ.','Ուրբ.','Շբ.','Կիր.'],    
+        dayNamesShort: ['Կիր.', 'Բշ.', 'Գշ.', 'Դշ.', 'Եշ.', 'Ուրբ.', 'Շբ.'],
+        dayNamesMin: ['Կիր.', 'Բշ.', 'Գշ.', 'Դշ.', 'Եշ.', 'Ուրբ.', 'Շբ.'],
+        monthNames: ['Հունուար','Փետրուար','Մարտ','Ապրիլ','Մայիս','Յունիս','Յուլիս','Օգոստոս','Սեպտեմբեր','Հոկտեմբեր','Նոյեմբեր','Դեկտեմբեր'],
     };
     // set default language to current language
     // get current page language
@@ -12,7 +13,8 @@ jQuery(document).ready(function($) {
     // change the datepicker language
     $('#quote_date_picker').datepicker({
         dateFormat: 'yy-mm-dd',
-        maxDate: null
+        maxDate: null,
+        firstDay: 1 // Set the first day of the week to Monday
     });
     // at date change, update quote-content WITH  the new quote
     $('#quote_date_picker').change(function() {
