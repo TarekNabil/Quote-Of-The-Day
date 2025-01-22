@@ -134,7 +134,7 @@ function qotd_get_quote_by_date() {
         while ($query->have_posts()) {
             $query->the_post();
             $output .= '<div class="quote-content">';
-            $output .= '<h2>' . get_the_title() . '</h2>';
+            $output .= '<h4>' . get_the_title() . '</h4>';
             $output .= '<div>' . get_the_content() . '</div>';
             $output .= '</div>';
         }
@@ -201,10 +201,12 @@ function qotd_import_quotes_from_csv($file) {
                 continue;
             }
             $quote = sanitize_text_field($data[1]);
-            $title = sanitize_text_field($data[0]);
             $pub_date = sanitize_text_field($data[0]);
 
-            // Convert the publication date to the correct format
+            // Convert the publication date to the correct format for title
+            $title = date('d/m/Y', strtotime($pub_date));
+
+            // Convert the publication date to the correct format for publication date
             $pub_date = date('Y-m-d H:i:s', strtotime($pub_date));
 
             // Insert the original quote into the database
