@@ -65,6 +65,7 @@ function qotd_display_quote_of_the_day($atts) {
                 $output .= '<div>' . get_the_content() . '</div>';
                 $output .= '</div>';
             }
+            wp_reset_postdata();
         } else {
             $output .= '<p>No quote found for this date.</p>';
         }
@@ -88,6 +89,7 @@ function qotd_display_quote_of_the_day($atts) {
                 $output .= '<div>' . get_the_content() . '</div>';
                 $output .= '</div>';
             }
+            wp_reset_postdata();
         } else {
             $output .= '<p>No quote found for this date.</p>';
         }
