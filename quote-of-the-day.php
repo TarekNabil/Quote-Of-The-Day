@@ -37,63 +37,131 @@ function qotd_create_quote_post_type() {
 }
 add_action('init', 'qotd_create_quote_post_type');
 
+function qotd_enqueue_admin_datepicker($hook) {
+    if ($hook !== 'post.php' && $hook !== 'post-new.php') {
+        return;
+    }
+
+    $screen = get_current_screen();
+    if (!$screen || $screen->post_type !== 'qotd_cpt') {
+        return;
+    }
+
+    wp_enqueue_script('jquery-ui-datepicker');
+    wp_enqueue_style('jquery-ui-css', 'https://code.jquery.com/ui/1.12.1/themes/flick/jquery-ui.css');
+
+    $inline_script = "jQuery(function($){ $('#qotd_quote_date').datepicker({ dateFormat: 'yy-mm-dd' }); var box = $('#qotd_quote_date_meta_box'); var side = $('#side-sortables'); if (box.length && side.length) { side.prepend(box); } });";
+    wp_add_inline_script('jquery-ui-datepicker', $inline_script);
+}
+add_action('admin_enqueue_scripts', 'qotd_enqueue_admin_datepicker');
+
+function qotd_add_quote_date_meta_box() {
+    add_meta_box(
+        'qotd_quote_date_meta_box',
+        __('Quote Date', 'quote-of-the-day'),
+        'qotd_render_quote_date_meta_box',
+        'qotd_cpt',
+        'side',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'qotd_add_quote_date_meta_box');
+
+function qotd_render_quote_date_meta_box($post) {
+    wp_nonce_field('qotd_save_quote_date', 'qotd_quote_date_nonce');
+
+    $quote_date = get_post_meta($post->ID, '_qotd_quote_date', true);
+    ?>
+    <p>
+        <label for="qotd_quote_date"><?php esc_html_e('Select quote date:', 'quote-of-the-day'); ?></label>
+    </p>
+    <input
+        type="text"
+        id="qotd_quote_date"
+        name="qotd_quote_date"
+        value="<?php echo esc_attr($quote_date); ?>"
+        class="regular-text"
+        style="max-width:100%;"
+        placeholder="YYYY-MM-DD"
+    />
+    <?php
+}
+
+function qotd_save_quote_date_meta($post_id) {
+    if (!isset($_POST['qotd_quote_date_nonce']) || !wp_verify_nonce($_POST['qotd_quote_date_nonce'], 'qotd_save_quote_date')) {
+        return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    if (!isset($_POST['qotd_quote_date'])) {
+        return;
+    }
+
+    $raw_date = sanitize_text_field(wp_unslash($_POST['qotd_quote_date']));
+
+    if ($raw_date === '') {
+        delete_post_meta($post_id, '_qotd_quote_date');
+        return;
+    }
+
+    $date = DateTime::createFromFormat('Y-m-d', $raw_date);
+    $is_valid = $date && $date->format('Y-m-d') === $raw_date;
+
+    if ($is_valid) {
+        update_post_meta($post_id, '_qotd_quote_date', $raw_date);
+    }
+}
+add_action('save_post_qotd_cpt', 'qotd_save_quote_date_meta');
+
 function qotd_display_quote_of_the_day($atts) {
     $output = '<div class="quote-of-the-day">';
     $output .= '<div id="quote_date_picker"></div>';
-    if (isset($_GET['quote_date'])) {
-        $date = $_GET['quote_date'];
+    $is_default_date = !isset($_GET['quote_date']) || $_GET['quote_date'] === '';
+    $date = isset($_GET['quote_date']) ? sanitize_text_field(wp_unslash($_GET['quote_date'])) : current_time('Y-m-d');
+    $parsed_date = DateTime::createFromFormat('Y-m-d', $date);
+    if (!$parsed_date || $parsed_date->format('Y-m-d') !== $date) {
+        $date = current_time('Y-m-d');
+        $is_default_date = true;
+    }
 
-        $args = array(
-            'post_type' => 'qotd_cpt',
-            'posts_per_page' => 1,
-            'date_query' => array(
-                array(
-                    'year'  => date('Y', strtotime($date)),
-                    'month' => date('m', strtotime($date)),
-                    'day'   => date('d', strtotime($date)),
-                ),
-            ),
-        );
-    
-        $query = new WP_Query($args);
-        if ($query->have_posts()) {
-            while ($query->have_posts()) {
-                $query->the_post();
-                
-                $output .= '<div class="quote-content">';
-                $output .= '<h2>' . get_the_title() . '</h2>';
-                $output .= '<div>' . get_the_content() . '</div>';
-                $output .= '</div>';
-            }
-            wp_reset_postdata();
-        } else {
-            $output .= '<p>No quote found for this date.</p>';
-        }
-        $output .= '<div id="quote_date_picker"></div>';
-        return $output;
+    $args = array(
+        'post_type' => 'qotd_cpt',
+        'posts_per_page' => 1,
+        'meta_key' => '_qotd_quote_date',
+        'meta_value' => $date,
+        'meta_compare' => '=',
+    );
 
-    } else {
-        // get latest quote
-        $args = array(
+    $query = new WP_Query($args);
+
+    // If no date was selected and there is no quote for today, show the latest published quote.
+    if ($is_default_date && !$query->have_posts()) {
+        $query = new WP_Query(array(
             'post_type' => 'qotd_cpt',
             'posts_per_page' => 1,
             'orderby' => 'date',
             'order' => 'DESC',
-        );
-        $query = new WP_Query($args);
-        if ($query->have_posts()) {
-            while ($query->have_posts()) {
-                $query->the_post();
-                $output .= '<div class="quote-content">';
-                $output .= '<h2>' . get_the_title() . '</h2>';
-                $output .= '<div>' . get_the_content() . '</div>';
-                $output .= '</div>';
-            }
-            wp_reset_postdata();
-        } else {
-            $output .= '<p>No quote found for this date.</p>';
-        }
+        ));
+    }
 
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            $output .= '<div class="quote-content">';
+            $output .= '<h2>' . get_the_title() . '</h2>';
+            $output .= '<div>' . get_the_content() . '</div>';
+            $output .= '</div>';
+        }
+        wp_reset_postdata();
+    } else {
+        $output .= '<p>No quote found for this date.</p>';
     }
 
 
@@ -116,17 +184,18 @@ add_action('wp_ajax_qotd_get_quote_by_date', 'qotd_get_quote_by_date');
 add_action('wp_ajax_nopriv_qotd_get_quote_by_date', 'qotd_get_quote_by_date');
 
 function qotd_get_quote_by_date() {
-    $date = $_POST['date'];
+    $date = isset($_POST['date']) ? sanitize_text_field(wp_unslash($_POST['date'])) : current_time('Y-m-d');
+    $parsed_date = DateTime::createFromFormat('Y-m-d', $date);
+    if (!$parsed_date || $parsed_date->format('Y-m-d') !== $date) {
+        $date = current_time('Y-m-d');
+    }
+
     $args = array(
         'post_type' => 'qotd_cpt',
         'posts_per_page' => 1,
-        'date_query' => array(
-            array(
-                'year'  => date('Y', strtotime($date)),
-                'month' => date('m', strtotime($date)),
-                'day'   => date('d', strtotime($date)),
-            ),
-        ),
+        'meta_key' => '_qotd_quote_date',
+        'meta_value' => $date,
+        'meta_compare' => '=',
     );
     
     $query = new WP_Query($args);
@@ -203,13 +272,13 @@ function qotd_import_quotes_from_csv($file) {
                 continue;
             }
             $quote = sanitize_text_field($data[1]);
-            $pub_date = sanitize_text_field($data[0]);
+            $csv_date = sanitize_text_field($data[0]);
+            $quote_date_meta = date('Y-m-d', strtotime($csv_date));
+            $import_post_date = current_time('mysql');
+            $import_post_date_gmt = current_time('mysql', true);
 
             // Convert the publication date to the correct format for title
-            $title = date('d/m/Y', strtotime($pub_date));
-
-            // Convert the publication date to the correct format for publication date
-            $pub_date = date('Y-m-d H:i:s', strtotime($pub_date));
+            $title = date('d/m/Y', strtotime($csv_date));
 
             // Insert the original quote into the database
             $original_post_id = wp_insert_post(array(
@@ -217,12 +286,14 @@ function qotd_import_quotes_from_csv($file) {
                 'post_content' => $quote,
                 'post_status' => 'publish',
                 'post_type' => 'qotd_cpt',
-                'post_date' => $pub_date
+                'post_date' => $import_post_date,
+                'post_date_gmt' => $import_post_date_gmt
             ));
 
             if (is_wp_error($original_post_id)) {
                 $failed_quotes[] = array('title' => $title, 'error' => $original_post_id->get_error_message());
             } else {
+                update_post_meta($original_post_id, '_qotd_quote_date', $quote_date_meta);
                 $imported_quotes[] = get_the_title($original_post_id);
             }
 
@@ -238,10 +309,13 @@ function qotd_import_quotes_from_csv($file) {
                         'post_content' => $translation,
                         'post_status' => 'publish',
                         'post_type' => 'qotd_cpt',
-                        'post_date' => $pub_date
+                        'post_date' => $import_post_date,
+                        'post_date_gmt' => $import_post_date_gmt
                     ));
 
                     if (!is_wp_error($translated_post_id)) {
+                        update_post_meta($translated_post_id, '_qotd_quote_date', $quote_date_meta);
+
                         // Link the translation to the original post
                         $wpml_element_type = apply_filters('wpml_element_type', 'post_qotd_cpt');
                         $get_language_args = array('element_id' => $original_post_id, 'element_type' => $wpml_element_type);
